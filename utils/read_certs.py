@@ -1,3 +1,6 @@
 from pathlib import Path
+import os 
 
-CA_BUNDLE = str(Path("/Users/andrejpihtin/Desktop/взлет26/russian_trusted_root_ca_pem.crt").resolve())
+CERT_PATH = os.getenv('RUS_CERT')
+
+CA_BUNDLE = str(Path(CERT_PATH).resolve())
