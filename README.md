@@ -42,21 +42,23 @@ ISpeak/
 ```
 
 
-Быстрый старт:
-1. Клонирование репозитория
+# Быстрый старт:
+## 1. Клонирование репозитория
+   
 git clone [https://github.com/](https://github.com/)<your-username>/ISpeak.git
+
 cd ISpeak
 
-2. Установка зависимостей
+## 2. Установка зависимостей
 Рекомендуется использовать виртуальное окружение:
 python -m venv venv
-# Windows:
+## Windows:
 venv\Scripts\activate
-# Linux / macOS:
+## Linux / macOS:
 source venv/bin/activate
 pip install streamlit gigachat python-dotenv
 
-3. Настройка .env
+## 3. Настройка .env
 Создайте файл .env в корне проекта (на основе .env.example) и заполните переменные:
 AUTH_TOKEN="ваш_authorization_key_из_кабинета_sber_studio"
 AUTH_URL="[https://ngw.devices.sberbank.ru:9443/api/v2/oauth](https://ngw.devices.sberbank.ru:9443/api/v2/oauth)"
@@ -65,10 +67,10 @@ RUS_CERT="utils/russian_trusted_root_ca_pem.crt"
 SYSTEM_PROMPT1="Системный промпт для режима Normal"
 SYSTEM_PROMPT2="Системный промпт для режима Mode Cockney"
 
-4. Запуск приложения
+## 4. Запуск приложения
 streamlit run front.py
 
 После запуска интерфейс откроется в браузере по адресу http://localhost:8501
 
-Поддержать автора:
+# Поддержать автора:
 2202206793063616 Сбер
