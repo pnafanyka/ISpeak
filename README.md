@@ -41,7 +41,7 @@ ISpeak/
 └── README.md
 
 
-```text
+
 Быстрый старт:
 1. Клонирование репозитория
 git clone [https://github.com/](https://github.com/)<your-username>/ISpeak.git
