@@ -60,12 +60,12 @@ pip install streamlit gigachat python-dotenv
 
 ## 3. Настройка .env
 Создайте файл .env в корне проекта (на основе .env.example) и заполните переменные:
-AUTH_TOKEN="ваш_authorization_key_из_кабинета_sber_studio"
-AUTH_URL="[https://ngw.devices.sberbank.ru:9443/api/v2/oauth](https://ngw.devices.sberbank.ru:9443/api/v2/oauth)"
-RUS_CERT="utils/russian_trusted_root_ca_pem.crt"
+1. AUTH_TOKEN="ваш_authorization_key_из_кабинета_sber_studio"
+2. AUTH_URL="[https://ngw.devices.sberbank.ru:9443/api/v2/oauth](https://ngw.devices.sberbank.ru:9443/api/v2/oauth)"
+3. RUS_CERT="utils/russian_trusted_root_ca_pem.crt"
 
-SYSTEM_PROMPT1="Системный промпт для режима Normal"
-SYSTEM_PROMPT2="Системный промпт для режима Mode Cockney"
+4. SYSTEM_PROMPT1="Системный промпт для режима Normal"
+5. SYSTEM_PROMPT2="Системный промпт для режима Mode Cockney"
 
 ## 4. Запуск приложения
 streamlit run front.py
