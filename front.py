@@ -1,89 +1,435 @@
 # import streamlit as st
+# from gigachat import GigaChat
+# from gigachat.models import Chat, Messages, MessagesRole
+# from utils.auth import authenticator
 # import os
 
 
-# st.title("ELIZA")
+# SYSTEM_PROMPT = os.getenv("SYSTEM_PROMPT", "").strip()
 
-# # Инициализируем историю чата, если её ещё нет
+# st.title("ISpeak")
+
+# # 1. Инициализируем историю чата в session_state
 # if "messages" not in st.session_state:
 #     st.session_state.messages = []
 
-# # Показываем все старые сообщения при каждом запуске страницы
+# # 2. Отрисовываем все сообщения из истории при каждом перезапуске страницы
 # for message in st.session_state.messages:
 #     with st.chat_message(message["role"]):
 #         st.markdown(message["content"])
 
-# # Реагируем на ввод пользователя
-# if prompt := st.chat_input("What is up?"):
-#     # Показываем сообщение пользователя
+
+# def get_gigachat_response(history: list[dict]) -> str:
+#     # Проверяем и при необходимости обновляем токен перед каждым запросом
+#     if authenticator.is_expired():
+#         authenticator.update()
+
+#     # Преобразуем словари из session_state в типизированные объекты Messages
+#     giga_messages = [
+#         Messages(
+#             role=MessagesRole.USER if msg["role"] == "user" else MessagesRole.ASSISTANT,
+#             content=msg["content"],
+#         )
+#         for msg in history
+#     ]
+
+#     with GigaChat(
+#         access_token=authenticator.api_token,
+#         verify_ssl_certs=False,
+#         model="GigaChat-3-Ultra",
+#     ) as giga:
+#         response = giga.chat(Chat(messages=giga_messages))
+#         return response.choices[0].message.content
+
+
+# # 3. Обрабатываем новый ввод пользователя
+# if prompt := st.chat_input("Введите сообщение..."):
+#     # Показываем и сохраняем сообщение пользователя
 #     with st.chat_message("user"):
 #         st.markdown(prompt)
-    
-#     # Сохраняем сообщение пользователя в историю
 #     st.session_state.messages.append({"role": "user", "content": prompt})
 
-#     if prompt == 'hi' or prompt == 'hello':
-#         response = prompt + '!'
+#     # Получаем и отображаем ответ модели
+#     with st.chat_message("assistant"):
+#         with st.spinner("Генерация ответа..."):
+#             try:
+#                 reply = get_gigachat_response(st.session_state.messages)
+#                 st.markdown(reply)
+#                 # Сохраняем ответ в историю только после успешного получения
+#                 st.session_state.messages.append({"role": "assistant", "content": reply})
+#             except Exception as e:
+#                 st.error(f"Ошибка при обращении к GigaChat API: {e}")
 
-#     elif 'sad' in prompt:
-#         response = 'Oh, that’s awful. What happened?'
-
-#     elif 'always' in prompt:
-#         response = 'Can you give a specific example?'
-
-#     else: 
-#         response = 'I’m sorry, I can’t help you...'
-
-#     # Показываем ответ бота
-#     with st.chat_message("ai"):
-#         st.markdown(response)
-    
-#     # Сохраняем ответ бота в историю
-#     st.session_state.messages.append({"role": "ai", "content": response})
-
-
-
-
-
-
+# import os
+# import streamlit as st
+# from dotenv import load_dotenv
 # from gigachat import GigaChat
+# from gigachat.models import Chat, Messages, MessagesRole
+# from utils.auth import authenticator
 
-# # Укажите ключ авторизации, полученный в личном кабинете, в интерфейсе проекта GigaChat API
-# with GigaChat(credentials="ваш_ключ_авторизации") as client:
-#     response = client.chat.create("Какие факторы влияют на стоимость страховки на дом?")
-#     print(response.messages[0].content[0].text)
+# # Явно загружаем переменные из .env (безопасно вызывать повторно, даже если это уже делает utils.auth)
+# load_dotenv()
+# SYSTEM_PROMPT = os.getenv("SYSTEM_PROMPT", "").strip()
+
+# st.title("ISpeak")
+
+# # 1. Инициализируем историю чата в session_state
+# if "messages" not in st.session_state:
+#     st.session_state.messages = []
+
+# # 2. Отрисовываем только сообщения пользователя и ассистента
+# for message in st.session_state.messages:
+#     with st.chat_message(message["role"]):
+#         st.markdown(message["content"])
 
 
+# def get_gigachat_response(history: list[dict]) -> str:
+#     if authenticator.is_expired():
+#         authenticator.update()
+
+#     giga_messages = []
+
+#     # Добавляем системный промпт в начало диалога, если он задан в .env
+#     if SYSTEM_PROMPT:
+#         giga_messages.append(
+#             Messages(role=MessagesRole.SYSTEM, content=SYSTEM_PROMPT)
+#         )
+
+#     # Добавляем историю переписки
+#     giga_messages.extend(
+#         Messages(
+#             role=MessagesRole.USER if msg["role"] == "user" else MessagesRole.ASSISTANT,
+#             content=msg["content"],
+#         )
+#         for msg in history
+#     )
+
+#     with GigaChat(
+#         access_token=authenticator.api_token,
+#         verify_ssl_certs=False,
+#         model="GigaChat-3-Ultra",
+#     ) as giga:
+#         response = giga.chat(Chat(messages=giga_messages))
+#         return response.choices[0].message.content
+
+
+# # 3. Обрабатываем новый ввод пользователя
+# if prompt := st.chat_input("Введите сообщение..."):
+#     with st.chat_message("user"):
+#         st.markdown(prompt)
+#     st.session_state.messages.append({"role": "user", "content": prompt})
+
+#     with st.chat_message("assistant"):
+#         with st.spinner("Генерация ответа..."):
+#             try:
+#                 reply = get_gigachat_response(st.session_state.messages)
+#                 st.markdown(reply)
+#                 st.session_state.messages.append({"role": "assistant", "content": reply})
+#             except Exception as e:
+#                 st.error(f"Ошибка при обращении к GigaChat API: {e}")
+
+# import os
+# import streamlit as st
+# from dotenv import load_dotenv
+# from gigachat import GigaChat
+# from gigachat.models import Chat, Messages, MessagesRole
+# from utils.auth import authenticator
+
+# load_dotenv()
+# SYSTEM_PROMPT1 = os.getenv("SYSTEM_PROMPT1", "").strip()
+# SYSTEM_PROMPT2 = os.getenv("SYSTEM_PROMPT2", "").strip()
+
+# # Шапка приложения: название слева, переключатель режимов справа на одном уровне
+# col_title, col_mode = st.columns([3, 2], vertical_alignment="center")
+# with col_title:
+#     st.title("ISpeak")
+# with col_mode:
+#     selected_mode = st.radio(
+#         "Режим общения",
+#         options=["Normal", "Mode Cockney"],
+#         horizontal=True,
+#         label_visibility="collapsed",
+#     )
+
+# # Выбираем активный системный промпт в зависимости от переключателя
+# active_system_prompt = (
+#     SYSTEM_PROMPT1 if selected_mode == "Normal" else SYSTEM_PROMPT2
+# )
+
+# # 1. Инициализируем историю чата в session_state
+# if "messages" not in st.session_state:
+#     st.session_state.messages = []
+
+# # 2. Отрисовываем историю сообщений
+# for message in st.session_state.messages:
+#     with st.chat_message(message["role"]):
+#         st.markdown(message["content"])
+
+
+# def get_gigachat_response(history: list[dict], system_prompt: str) -> str:
+#     if authenticator.is_expired():
+#         authenticator.update()
+
+#     giga_messages = []
+
+#     if system_prompt:
+#         giga_messages.append(
+#             Messages(role=MessagesRole.SYSTEM, content=system_prompt)
+#         )
+
+#     giga_messages.extend(
+#         Messages(
+#             role=MessagesRole.USER if msg["role"] == "user" else MessagesRole.ASSISTANT,
+#             content=msg["content"],
+#         )
+#         for msg in history
+#     )
+
+#     with GigaChat(
+#         access_token=authenticator.api_token,
+#         verify_ssl_certs=False,
+#         model="GigaChat-3-Ultra",
+#     ) as giga:
+#         response = giga.chat(Chat(messages=giga_messages))
+#         return response.choices[0].message.content
+
+
+# # 3. Обрабатываем ввод пользователя
+# if prompt := st.chat_input("Введите сообщение..."):
+#     with st.chat_message("user"):
+#         st.markdown(prompt)
+#     st.session_state.messages.append({"role": "user", "content": prompt})
+
+#     with st.chat_message("assistant"):
+#         with st.spinner("Генерация ответа..."):
+#             try:
+#                 reply = get_gigachat_response(
+#                     st.session_state.messages,
+#                     active_system_prompt,
+#                 )
+#                 st.markdown(reply)
+#                 st.session_state.messages.append({"role": "assistant", "content": reply})
+#             except Exception as e:
+#                 st.error(f"Ошибка при обращении к GigaChat API: {e}")
+
+
+# import os
+# import streamlit as st
+# from dotenv import load_dotenv
+# from gigachat import GigaChat
+# from gigachat.models import Chat, Messages, MessagesRole
+# from utils.auth import authenticator
+
+# load_dotenv()
+# SYSTEM_PROMPT1 = os.getenv("SYSTEM_PROMPT1", "").strip()
+# SYSTEM_PROMPT2 = os.getenv("SYSTEM_PROMPT2", "").strip()
+
+# # Инициализируем состояние сессии
+# if "messages" not in st.session_state:
+#     st.session_state.messages = []
+
+# if "current_mode" not in st.session_state:
+#     st.session_state.current_mode = "Normal"
+
+
+# def on_mode_change() -> None:
+#     """Добавляет в историю скрытую инструкцию при переключении режима."""
+#     new_mode = st.session_state.mode_selector
+#     if new_mode == st.session_state.current_mode:
+#         return
+
+#     st.session_state.current_mode = new_mode
+
+#     # Если история пуста, модель сразу получит новый SYSTEM_PROMPT без переходного сообщения
+#     if not st.session_state.messages:
+#         return
+
+#     switch_note = (
+#         "[SYSTEM NOTE: The user has switched your mode to NORMAL. "
+#         "Stop using Cockney and strictly follow the Normal system prompt from this point on.]"
+#         if new_mode == "Normal"
+#         else "[SYSTEM NOTE: The user has switched your mode to MODE COCKNEY. "
+#         "Switch immediately and strictly follow the Mode Cockney system prompt from this point on.]"
+#     )
+
+#     # Если пользователь переключил режим несколько раз подряд до отправки сообщения, перезаписываем последнюю скрытую метку
+#     if st.session_state.messages[-1].get("hidden"):
+#         st.session_state.messages[-1]["content"] = switch_note
+#     else:
+#         st.session_state.messages.append(
+#             {
+#                 "role": "user",
+#                 "content": switch_note,
+#                 "hidden": True,
+#             }
+#         )
+
+
+# # Верхняя панель: заголовок, переключатель режимов и кнопка очистки на одном уровне
+# col_title, col_mode, col_clear = st.columns(
+#     [2.2, 2.5, 1.3], vertical_alignment="center"
+# )
+
+# with col_title:
+#     st.title("ISpeak")  #[cite: 2]
+
+# with col_mode:
+#     selected_mode = st.radio(
+#         "Режим общения",
+#         options=["Normal", "Mode Cockney"],
+#         horizontal=True,
+#         label_visibility="collapsed",
+#         key="mode_selector",
+#         on_change=on_mode_change,
+#     )
+
+# with col_clear:
+#     if st.button("Очистить чат", use_container_width=True):
+#         st.session_state.messages = []
+#         st.rerun()
+
+# active_system_prompt = (
+#     SYSTEM_PROMPT1 if selected_mode == "Normal" else SYSTEM_PROMPT2
+# )
+
+# # Отрисовываем только видимые для пользователя сообщения
+# for message in st.session_state.messages:
+#     if message.get("hidden"):
+#         continue
+#     with st.chat_message(message["role"]):
+#         st.markdown(message["content"])
+
+
+# def get_gigachat_response(history: list[dict], system_prompt: str) -> str:
+#     if authenticator.is_expired():  #[cite: 2]
+#         authenticator.update()  #[cite: 2]
+
+#     giga_messages = []
+
+#     if system_prompt:
+#         giga_messages.append(
+#             Messages(role=MessagesRole.SYSTEM, content=system_prompt)
+#         )
+
+#     for msg in history:
+#         role = (
+#             MessagesRole.USER
+#             if msg["role"] == "user"
+#             else MessagesRole.ASSISTANT
+#         )
+#         # Склеиваем подряд идущие сообщения роли user (скрытую метку смены режима + новый запрос),
+#         # чтобы не нарушать строгое чередование ролей user/assistant в GigaChat API
+#         if giga_messages and giga_messages[-1].role == role:
+#             giga_messages[-1].content += f"\n\n{msg['content']}"
+#         else:
+#             giga_messages.append(Messages(role=role, content=msg["content"]))
+
+#     with GigaChat(
+#         access_token=authenticator.api_token,  #[cite: 2]
+#         verify_ssl_certs=False,  #[cite: 2]
+#         model="GigaChat-3-Ultra",  #[cite: 2]
+#     ) as giga:
+#         response = giga.chat(Chat(messages=giga_messages))  #[cite: 2]
+#         return response.choices[0].message.content  #[cite: 2]
+
+
+# # Обработка ввода пользователя
+# if prompt := st.chat_input("Введите сообщение..."):  #[cite: 2]
+#     with st.chat_message("user"):
+#         st.markdown(prompt)
+#     st.session_state.messages.append({"role": "user", "content": prompt})
+
+#     with st.chat_message("assistant"):
+#         with st.spinner("Генерация ответа..."):  #[cite: 2]
+#             try:
+#                 reply = get_gigachat_response(
+#                     st.session_state.messages,
+#                     active_system_prompt,
+#                 )
+#                 st.markdown(reply)
+#                 st.session_state.messages.append(
+#                     {"role": "assistant", "content": reply}
+#                 )
+#             except Exception as e:
+#                 st.error(f"Ошибка при обращении к GigaChat API: {e}")  #[cite: 2]
+
+
+import os
 import streamlit as st
+from dotenv import load_dotenv
 from gigachat import GigaChat
 from gigachat.models import Chat, Messages, MessagesRole
 from utils.auth import authenticator
 
-st.title("ISpeak")
+load_dotenv()
+SYSTEM_PROMPT1 = os.getenv("SYSTEM_PROMPT1", "").strip()
+SYSTEM_PROMPT2 = os.getenv("SYSTEM_PROMPT2", "").strip()
 
-# 1. Инициализируем историю чата в session_state
+# Инициализируем историю чата
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 2. Отрисовываем все сообщения из истории при каждом перезапуске страницы
+
+def clear_chat_history() -> None:
+    """Полностью очищает историю переписки в session_state."""
+    st.session_state.messages = []
+
+
+# Верхняя панель: название, переключатель режимов и кнопка очистки на одном уровне
+col_title, col_mode, col_clear = st.columns(
+    [2.2, 2.5, 1.3], vertical_alignment="center"
+)
+
+with col_title:
+    st.title("ISpeak")
+
+with col_mode:
+    selected_mode = st.radio(
+        "Режим общения",
+        options=["Normal", "Mode Cockney"],
+        horizontal=True,
+        label_visibility="collapsed",
+        key="mode_selector",
+        on_change=clear_chat_history,
+    )
+
+with col_clear:
+    st.button(
+        "Очистить чат",
+        use_container_width=True,
+        on_click=clear_chat_history,
+    )
+
+# Определяем системный промпт для активного режима
+active_system_prompt = (
+    SYSTEM_PROMPT1 if selected_mode == "Normal" else SYSTEM_PROMPT2
+)
+
+# Отрисовываем историю сообщений
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
 
-def get_gigachat_response(history: list[dict]) -> str:
-    # Проверяем и при необходимости обновляем токен перед каждым запросом
+def get_gigachat_response(history: list[dict], system_prompt: str) -> str:
     if authenticator.is_expired():
         authenticator.update()
 
-    # Преобразуем словари из session_state в типизированные объекты Messages
-    giga_messages = [
+    giga_messages = []
+
+    # Всегда передаём актуальный системный промпт выбранного режима первым сообщением
+    if system_prompt:
+        giga_messages.append(
+            Messages(role=MessagesRole.SYSTEM, content=system_prompt)
+        )
+
+    giga_messages.extend(
         Messages(
             role=MessagesRole.USER if msg["role"] == "user" else MessagesRole.ASSISTANT,
             content=msg["content"],
         )
         for msg in history
-    ]
+    )
 
     with GigaChat(
         access_token=authenticator.api_token,
@@ -94,20 +440,22 @@ def get_gigachat_response(history: list[dict]) -> str:
         return response.choices[0].message.content
 
 
-# 3. Обрабатываем новый ввод пользователя
+# Обработка нового сообщения пользователя
 if prompt := st.chat_input("Введите сообщение..."):
-    # Показываем и сохраняем сообщение пользователя
     with st.chat_message("user"):
         st.markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Получаем и отображаем ответ модели
     with st.chat_message("assistant"):
         with st.spinner("Генерация ответа..."):
             try:
-                reply = get_gigachat_response(st.session_state.messages)
+                reply = get_gigachat_response(
+                    st.session_state.messages,
+                    active_system_prompt,
+                )
                 st.markdown(reply)
-                # Сохраняем ответ в историю только после успешного получения
-                st.session_state.messages.append({"role": "assistant", "content": reply})
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": reply}
+                )
             except Exception as e:
                 st.error(f"Ошибка при обращении к GigaChat API: {e}")
