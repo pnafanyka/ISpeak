@@ -3,7 +3,7 @@ import requests
 import uuid
 import time
 
-from read_certs import CA_BUNDLE
+from .read_certs import CA_BUNDLE
 
 AUTH_URL = os.getenv('AUTH_URL')
 AUTH_TOKEN = os.getenv('AUTH_TOKEN')
