@@ -12,7 +12,7 @@ class Auth():
 
     def __init__(self):
         api_token, token_expiration_timestamp = self.get_auth_token()
-        self.api_token = api_token, 
+        self.api_token = api_token
         self.token_expiration_timestamp = token_expiration_timestamp
 
 
@@ -46,4 +46,5 @@ class Auth():
 authenticator = Auth()
 
 if __name__=='__main__':
-    print(Auth().get_auth_token())
+    print(authenticator.api_token)
+
